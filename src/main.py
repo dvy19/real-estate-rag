@@ -1,30 +1,27 @@
 
-from document_loader import load_documents
-from text_splitter import split_documents
-from EmbeddingManager import EmbeddingManager
-from VectorStore import VectorStore
-from Generator import Generator
+from .document_loader import load_documents
+from .text_splitter import split_documents
+from .EmbeddingManager import EmbeddingManager
+from .VectorStore import VectorStore
+from .Generator import Generator
 
 
 def initialize_rag():
-    """Load documents and initialize the RAG components."""
+    """Load the existing vector store and initialize the RAG components."""
 
-    print("Loading documents...")
-    documents = load_documents()
-
-    print("Splitting documents...")
-    chunks = split_documents(documents=documents)
-    print(f"Number of chunks: {len(chunks)}")
-
-    texts = [chunk.page_content for chunk in chunks]
-
-    print("Generating embeddings...")
+    print("Initializing embedding manager...")
     embedding_manager = EmbeddingManager()
-    embeddings = embedding_manager.generate_embeddings(texts)
 
-    print("Initializing vector store...")
+    print("Loading existing vector store...")
     vector_store = VectorStore(embedding_manager)
-    vector_store.add_documents(texts, embeddings)
+
+    count = vector_store.collection.count()
+    print(f"Existing chunks in ChromaDB: {count}")
+
+    if count == 0:
+        raise RuntimeError(
+            "ChromaDB collection is empty. Index your documents first."
+        )
 
     print("Initializing generator...")
     generator = Generator()
@@ -32,6 +29,7 @@ def initialize_rag():
     print("RAG pipeline initialized successfully.")
 
     return vector_store, generator
+
 
 
 def answer_question(query, vector_store, generator):

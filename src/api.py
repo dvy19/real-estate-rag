@@ -5,7 +5,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from main import initialize_rag, answer_question
+from .main import initialize_rag, answer_question
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
