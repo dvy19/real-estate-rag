@@ -5,7 +5,9 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from .main import initialize_rag, answer_question
+from src.main import initialize_rag, answer_question
+
+from ml_service import predict_price
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -74,3 +76,34 @@ def chat(request: ChatRequest, http_request: Request):
             status_code=500,
             detail="An error occurred while generating the answer.",
         )
+
+
+class HouseFeatures(BaseModel):
+    area: float
+    flooers: int
+    bedrooms: int
+    bathrooms: int
+    bhk: int
+    property_type: str
+    furnished: str
+    parking: str
+    city: str
+
+
+@app.post("/predict-price")
+def predict_house_price(data: HouseFeatures):
+    features = {
+        "area": data.area,
+        "flooers": data.flooers,
+        "bedrooms": data.bedrooms,
+        "bathrooms": data.bathrooms,
+        "bhk": data.bhk,
+        "property type": data.property_type,
+        "furnished": data.furnished,
+        "parking": data.parking,
+        "city": data.city,
+    }
+
+    price = predict_price(features)
+
+    return {"predicted_price": price}
